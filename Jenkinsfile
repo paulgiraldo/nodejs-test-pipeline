@@ -49,5 +49,36 @@ pipeline {
                 '''
             }
         }
+
+        stage('Testear conexion SHH con servidor digital Ocean') {
+            when {
+                branch 'develop'
+            }
+            agent any
+
+            steps {
+                sshagent(['droplet-ssh-key']) {
+                    sh 'ssh -o StrictHostKeyChecking=no root@165.22.186.185 "echo conexion correcta"'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            mail to: 'paulgiraldo72@gmail.com',
+                 subject: "Pipeline ${env.JOB_NAME} ejecucion correcta",
+                 body: """
+                 Hola,
+
+                 El pipeline '${env.JOB_NAME}' (Build #${env.BUILD_NUMBER}) ha finalizado de manera correcta
+
+                 Los detalles se pueden revisar en el siguiente enlace:
+                 ${env.BUILD_URL}
+
+                 Saludos,
+                 Jenkins Server
+                 """
+        }
     }
 }
