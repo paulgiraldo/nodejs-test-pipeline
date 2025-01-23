@@ -58,7 +58,29 @@ pipeline {
 
             steps {
                 sshagent(['droplet-ssh-key']) {
-                    sh 'ssh -o StrictHostKeyChecking=no root@165.22.186.185 "echo conexion correcta"'
+                    sh 'ssh -o StrictHostKeyChecking=no root@104.248.48.92 "echo conexion correcta"'
+                }
+            }
+        }
+
+        stage('Desplegar proyecto node a Digital ocean') {
+            when {
+                branch 'develop'
+            }
+            agent any
+
+            environment {
+                    DOCKER_REPO = 'paulgiraldo/jenkins-node'
+            }
+
+            steps {
+                sshagent(['droplet-ssh-key']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no root@104.248.48.92 "
+                        docker pull $DOCKER_REPO:latest &&
+                        docker run -d --name node_project_paulgiraldo -p 8082:3000 $DOCKER_REPO:latest
+                        "
+                    '''
                 }
             }
         }
